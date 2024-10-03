@@ -4,4 +4,4 @@ patchesStrategicMerge:
   - deployment.yaml
 namespace: mobile-api
 resources:
-  - ../base
+  - ../../base
