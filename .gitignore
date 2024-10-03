@@ -56,3 +56,14 @@ yarn.lock
 *.bak
 *.swp
 *.lock
+
+# Terraform files
+.terraform/
+credentials/
+
+# Terraform variable files
+*.tfvars
+*.tfvars.json
+
+# Terraform workspace files
+.terraform.lock.hcl

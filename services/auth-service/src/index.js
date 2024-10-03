@@ -6,13 +6,18 @@ app.use(express.json());
 app.post('/auth', (req, res) => {
   const { username, password } = req.body;
 
+  const secretValue = process.env.SECRET_VALUE || 'No secret found';
+
   if (username === 'admin' && password === 'password123') {
     return res.json({
       message: 'Authentication successful',
       token: 'dummy-token',
+      secret: secretValue,
     });
   } else {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    return res
+      .status(401)
+      .json({ message: 'Invalid credentials', secret: secretValue });
   }
 });
 
