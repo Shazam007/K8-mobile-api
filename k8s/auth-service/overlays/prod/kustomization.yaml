@@ -5,4 +5,4 @@ patchesStrategicMerge:
   # - service.yaml
 namespace: mobile-api
 resources:
-  - ../base
+  - ../../base
