@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: mobile-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    spec:
+      containers:
+        - name: auth-service
+          image: gcr.io/your-project-id/auth-service-prod:latest
+          resources:
+            requests:
+              memory: '128Mi' # Minimum memory guaranteed to the container
+              cpu: '250m' # Minimum CPU guaranteed to the container (0.25 of a CPU)
+            limits:
+              memory: '256Mi' # Maximum memory the container can use
+              cpu: '500m' # Maximum CPU the container can use (0.5 of a CPU)

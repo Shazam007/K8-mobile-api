@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secret-ksa
+  namespace: mobile-api
+  annotations:
+    iam.gke.io/gcp-service-account: external-secret-gsa@devops-435706.iam.gserviceaccount.com
