@@ -13,6 +13,8 @@ on:
 jobs:
   check-for-changes:
     runs-on: ubuntu-latest
+    outputs:
+      updated_services: ${{ steps.check_changes.outputs.updated_services }}  # Output for the list of updated services
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -33,18 +35,17 @@ jobs:
             fi
           done
           
-          # If any services were updated, save them as an environment variable
+          # If any services were updated, save them as an output
+          echo "::set-output name=updated_services::${UPDATED_SERVICES}"
           if [ -n "$UPDATED_SERVICES" ]; then
-            echo "UPDATED_SERVICES=$UPDATED_SERVICES" >> $GITHUB_ENV
             echo "Changes detected in the following services: $UPDATED_SERVICES"
           else
             echo "No changes detected in any services."
-            echo "UPDATED_SERVICES=" >> $GITHUB_ENV
           fi
 
   deploy-auth:
     needs: check-for-changes  # This job depends on the check-for-changes job
-    if: ${{ contains(env.UPDATED_SERVICES, 'auth-service') }}  # Only run this job if auth-service is updated
+    if: ${{ contains(needs.check-for-changes.outputs.updated_services, 'auth-service') }}  # Only run this job if auth-service is updated
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=auth-service"
