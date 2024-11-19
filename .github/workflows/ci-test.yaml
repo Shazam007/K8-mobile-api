@@ -45,7 +45,7 @@ jobs:
   deploy-auth:
     needs: check-for-changes  # This job depends on the check-for-changes job
     if: ${{ contains(env.UPDATED_SERVICES, 'auth-service') }}  # Only run this job if auth-service is updated
-    uses: ./shared/docker-build-and-push.yaml
+    uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=auth-service"
       dockerfile_path: "./Dockerfile"
