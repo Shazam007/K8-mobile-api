@@ -17,7 +17,7 @@ app.post('/auth', (req, res) => {
   } else {
     return res
       .status(401)
-      .json({ message: 'Invalid credentials', secret: secretValue });
+      .json({ message: 'Invalid credentials found', secret: secretValue });
   }
 });
 
