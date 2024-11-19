@@ -60,6 +60,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           file: ${{ inputs.dockerfile_path }}
+          provenance: false
 
       - name: Run Trivy vulnerability scanner
         id: trivy-scan-table
