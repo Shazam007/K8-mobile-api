@@ -56,14 +56,15 @@ jobs:
           cache-to: type=gha,mode=max
           file: ${{ inputs.dockerfile_path }}
 
-      - name: Scan image for vulnerabilities as sarif
+      - name: Run Trivy vulnerability scanner
         id: trivy-scan-table
         uses: aquasecurity/trivy-action@0.28.0
-        if: ${{ github.event_name == 'push' }}
         with:
           image-ref: ${{ inputs.image_name }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
