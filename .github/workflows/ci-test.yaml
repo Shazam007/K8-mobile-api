@@ -40,12 +40,12 @@ jobs:
       # need to have a if here
 
       - name: Run shared workflow
-        uses: ./shared/docker-build-and-push.yaml
+        uses: ./.github/workflows/shared/docker-build-and-push.yaml
         with: 
           docker_build_args: "service_name=auth-service"
           dockerfile_path: "./Dockerfile"
           docker_context: "."
-          image_name: "gcr.io/devops-435706/finance-service-test:${{ github.sha }}"
+          image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
 
 
 

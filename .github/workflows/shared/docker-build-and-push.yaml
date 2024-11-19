@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -59,7 +59,7 @@ jobs:
       - name: Scan image for vulnerabilities as sarif
         id: trivy-scan-table
         uses: aquasecurity/trivy-action@0.28.0
-        if: ${{ inputs.trivy_scan && github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         with:
           image-ref: ${{ input.image_name }}
           format: 'sarif'
@@ -69,7 +69,7 @@ jobs:
       - name: Upload Trivy scan results to GitHub Security tab
         id: trivy-scan-sarif-results
         uses: github/codeql-action/upload-sarif@v3
-        if: ${{  inputs.trivy_scan && github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         with:
           sarif_file: 'trivy-results.sarif'
 
