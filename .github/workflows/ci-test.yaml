@@ -22,7 +22,7 @@ jobs:
       - name: Check for Changes in Directory
         id: check_changes
         run: |
-          echo "Checking for changes in services/auth-service/..."
+          echo "Checking changes in services/auth-service/..."
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^services/auth-service/'; then
             echo "changes=true" >> $GITHUB_ENV
           else
