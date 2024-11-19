@@ -1,0 +1,90 @@
+name: docker-build-push
+
+on:
+  workflow_call:
+    inputs:
+      docker_build_args:
+        description: "add build args as one string"
+        type: 'string'
+        required : false
+      dockerfile_path:
+        description: "path for dockerfile"
+        type: 'string'
+        required : false
+        default: "Dockerfile"
+      docker_context:
+        description: "path for docker context"
+        type: 'string'
+        required : false
+        default: "."
+      image_name:
+        description: "docker image name"
+        type: 'string'
+        required : true
+      trivy_scan:
+        description: "run trivy scan"
+        type: boolean
+        required : true
+        default: false
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Authenticate to Google Container Registry
+        run: |
+          gcloud auth configure-docker
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push - App
+        uses: docker/build-push-action@v6
+        id: build_and_push_app
+        with:
+          context: ${{ inputs.docker_context }}
+          build-args: ${{ inputs.docker_build_args || '' }}
+          push: true
+          tags: ${{ inputs.image_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: ${{ inputs.dockerfile_path }}
+          provenance: false
+
+      - name: Run Trivy vulnerability scanner
+        id: trivy-scan-table
+        if: ${{ inputs.trivy_scan }}
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ inputs.image_name }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        id: trivy-scan-sarif-results
+        if: ${{ inputs.trivy_scan }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+
+
+
+      # - name: Build Docker Image for Auth Service
+      #   run: |
+      #     docker build --build-arg service_name=auth-service -t gcr.io/devops-435706/auth-service:latest .
+      #     docker push gcr.io/devops-435706/auth-service:latest

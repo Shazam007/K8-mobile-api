@@ -1,0 +1,116 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check-for-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      updated_services: ${{ steps.check_changes.outputs.updated_services }}
+      run_all_jobs: ${{ steps.check_changes.outputs.run_all_jobs }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history to ensure main branch is available
+
+      - name: Fetch Main Branch
+        run: |
+          # Fetch main explicitly if it's not present
+          git fetch origin main:main
+
+      - name: Determine Base Ref for Comparison
+        id: determine_base_ref
+        run: |
+          # Check if this is a new branch (before hash is all zeros)
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            echo "Base ref is main (new branch detected)"
+            echo "::set-output name=base_ref::main"
+          else
+            echo "Base ref is previous commit"
+            echo "::set-output name=base_ref::${{ github.event.before }}"
+          fi
+
+      - name: Check for Changes in Services and Root Directory
+        id: check_changes
+        run: |
+          BASE_REF="${{ steps.determine_base_ref.outputs.base_ref }}"
+          echo "Comparing changes against $BASE_REF"
+
+          # Initialize outputs
+          UPDATED_SERVICES=""
+          RUN_ALL_JOBS="false"
+
+          # Check for changes in services
+          for service in services/*/; do
+            service_name=$(basename $service)
+            if git diff --name-only "$BASE_REF" ${{ github.sha }} | grep -q "^${service}"; then
+              UPDATED_SERVICES="${UPDATED_SERVICES} ${service_name}"
+            fi
+          done
+
+          # Check for changes in the root directory (excluding services/)
+          if git diff --name-only "$BASE_REF" ${{ github.sha }} | grep -qv '^services/'; then
+            echo "Changes detected in the root directory (excluding services/)."
+            RUN_ALL_JOBS="true"
+          fi
+
+          # Set outputs
+          echo "::set-output name=updated_services::${UPDATED_SERVICES}"
+          echo "::set-output name=run_all_jobs::${RUN_ALL_JOBS}"
+        shell: bash
+
+  build-auth:
+    needs: check-for-changes
+    if: ${{ needs.check-for-changes.outputs.run_all_jobs == 'true' || contains(needs.check-for-changes.outputs.updated_services, 'auth-service') }}
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=auth-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
+      trivy_scan: false
+    secrets: inherit
+
+  build-finance:
+    needs: check-for-changes
+    if: ${{ needs.check-for-changes.outputs.run_all_jobs == 'true' || contains(needs.check-for-changes.outputs.updated_services, 'finance-service') }}
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=finance-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
+      trivy_scan: false
+    secrets: inherit
+
+  build-payment:
+    needs: check-for-changes
+    if: ${{ needs.check-for-changes.outputs.run_all_jobs == 'true' || contains(needs.check-for-changes.outputs.updated_services, 'payment-service') }}  # Only run this job if payment-service is updated
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=payment-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/payment-service:${{ github.sha }}"
+      trivy_scan: false
+    secrets: inherit
+
+  build-status:
+    needs: check-for-changes  
+    if: ${{ needs.check-for-changes.outputs.run_all_jobs == 'true' || contains(needs.check-for-changes.outputs.updated_services, 'status-service') }}  # Only run this job if status-service is updated
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=status-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/status-service:${{ github.sha }}"
+      trivy_scan: false
+    secrets: inherit
+    
+
+
+

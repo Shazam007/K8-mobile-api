@@ -11,13 +11,13 @@ app.post('/auth', (req, res) => {
   if (username === 'admin' && password === 'password123') {
     return res.json({
       message: 'Authentication successful',
-      token: 'dummy-token',
+      token: 'dummy----token',
       secret: secretValue,
     });
   } else {
     return res
       .status(401)
-      .json({ message: 'Invalid credentials', secret: secretValue });
+      .json({ message: 'Invalid credentials found', secret: secretValue });
   }
 });
 

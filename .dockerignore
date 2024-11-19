@@ -1,0 +1,23 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environment files
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Test-related files
+coverage
+test
+
+# Ignore build artifacts
+dist/
+build/
+
+# OS files
+.DS_Store
