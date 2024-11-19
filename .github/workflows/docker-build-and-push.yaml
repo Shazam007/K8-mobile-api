@@ -51,7 +51,7 @@ jobs:
           context: ${{ inputs.docker_context }}
           build-args: ${{ inputs.docker_build_args || '' }}
           push: true
-          tags: ${{ input.image_name }}
+          tags: ${{ inputs.image_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           file: ${{ inputs.dockerfile_path }}
@@ -61,7 +61,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.28.0
         if: ${{ github.event_name == 'push' }}
         with:
-          image-ref: ${{ input.image_name }}
+          image-ref: ${{ inputs.image_name }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
