@@ -11,7 +11,7 @@ app.post('/auth', (req, res) => {
   if (username === 'admin' && password === 'password123') {
     return res.json({
       message: 'Authentication successful',
-      token: 'dummy--token',
+      token: 'dummy-token',
       secret: secretValue,
     });
   } else {
