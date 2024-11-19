@@ -52,6 +52,7 @@ jobs:
       dockerfile_path: "./Dockerfile"
       docker_context: "."
       image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
+    secrets: inherit
     
 
       # cant use reusable workflow as a step
