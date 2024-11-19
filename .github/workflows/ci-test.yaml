@@ -10,12 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       updated_services: ${{ steps.check_changes.outputs.updated_services }}
-      run_all_jobs: ${{ steps.check_changes.outputs.run_all_jobs }}  # Output for whether all jobs should run
+      run_all_jobs: ${{ steps.check_changes.outputs.run_all_jobs }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2  # Ensure enough history is fetched for git diff to work
+          fetch-depth: 0  # Fetch all history to ensure main branch is available
+
+      - name: Fetch Main Branch
+        run: |
+          # Fetch main explicitly if it's not present
+          git fetch origin main:main
 
       - name: Determine Base Ref for Comparison
         id: determine_base_ref
@@ -23,7 +28,7 @@ jobs:
           # Check if this is a new branch (before hash is all zeros)
           if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
             echo "Base ref is main (new branch detected)"
-            echo "::set-output name=base_ref::origin/main"
+            echo "::set-output name=base_ref::main"
           else
             echo "Base ref is previous commit"
             echo "::set-output name=base_ref::${{ github.event.before }}"
