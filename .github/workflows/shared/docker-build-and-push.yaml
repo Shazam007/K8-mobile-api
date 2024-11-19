@@ -1,0 +1,82 @@
+name: docker-build-push
+
+on:
+  workflow_call:
+    inputs:
+      docker_build_args:
+        description: "add build args as one string"
+        type: 'string'
+        required : false
+      dockerfile_path:
+        description: "path for dockerfile"
+        type: 'string'
+        required : false
+        default: "Dockerfile"
+      docker_context:
+        description: "path for docker context"
+        type: 'string'
+        required : false
+        default: "."
+      image_name:
+        description: "docker image name"
+        type: 'string'
+        required : true
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Authenticate to Google Container Registry
+        run: |
+          gcloud auth configure-docker
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push - App
+        uses: docker/build-push-action@v6
+        id: build_and_push_app
+        with:
+          context: ${{ inputs.docker_context }}
+          build-args: ${{ inputs.docker_build_args || '' }}
+          push: true
+          tags: ${{ input.image_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: ${{ inputs.dockerfile_path }}
+
+      - name: Scan image for vulnerabilities as sarif
+        id: trivy-scan-table
+        uses: aquasecurity/trivy-action@0.28.0
+        if: ${{ inputs.trivy_scan && github.event_name == 'push' }}
+        with:
+          image-ref: ${{ input.image_name }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        id: trivy-scan-sarif-results
+        uses: github/codeql-action/upload-sarif@v3
+        if: ${{  inputs.trivy_scan && github.event_name == 'push' }}
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+
+
+
+      # - name: Build Docker Image for Auth Service
+      #   run: |
+      #     docker build --build-arg service_name=auth-service -t gcr.io/devops-435706/auth-service:latest .
+      #     docker push gcr.io/devops-435706/auth-service:latest
