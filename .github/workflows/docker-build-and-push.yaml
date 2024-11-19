@@ -21,6 +21,11 @@ on:
         description: "docker image name"
         type: 'string'
         required : true
+      trivy_scan:
+        description: "run trivy scan"
+        type: boolean
+        required : true
+        default: false
 
 jobs:
   docker-build-push:
@@ -58,6 +63,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         id: trivy-scan-table
+        if: ${{ inputs.trivy_scan }}
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ inputs.image_name }}
@@ -69,8 +75,8 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         id: trivy-scan-sarif-results
+        if: ${{ inputs.trivy_scan }}
         uses: github/codeql-action/upload-sarif@v3
-        if: ${{ github.event_name == 'push' }}
         with:
           sarif_file: 'trivy-results.sarif'
 
