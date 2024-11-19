@@ -19,38 +19,49 @@ jobs:
         with:
           fetch-depth: 2  # Ensure enough history is fetched for git diff to work
 
-      - name: Check for Changes in Directory
+      - name: Check for Changes in Services
         id: check_changes
         run: |
-          echo "Checking changes in services/auth-service/..."
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^services/auth-service/'; then
-            echo "changes=true" >> $GITHUB_ENV
+          # Initialize an empty list to track updated services
+          UPDATED_SERVICES=""
+          
+          # Check for changes in each service directory
+          for service in services/*/; do
+            service_name=$(basename $service)
+            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^${service}"; then
+              UPDATED_SERVICES="${UPDATED_SERVICES} ${service_name}"
+            fi
+          done
+          
+          # If any services were updated, save them as an environment variable
+          if [ -n "$UPDATED_SERVICES" ]; then
+            echo "UPDATED_SERVICES=$UPDATED_SERVICES" >> $GITHUB_ENV
+            echo "Changes detected in the following services: $UPDATED_SERVICES"
           else
-            echo "changes=false" >> $GITHUB_ENV
+            echo "No changes detected in any services."
+            echo "UPDATED_SERVICES=" >> $GITHUB_ENV
           fi
 
-      - name: Skip Steps if No Changes
-        if: env.changes == 'false'
-        run: echo "No changes detected in services/auth-service/. Skipping subsequent steps."
+  deploy-auth:
+    needs: check-for-changes  # This job depends on the check-for-changes job
+    if: ${{ contains(env.UPDATED_SERVICES, 'auth-service') }}  # Only run this job if auth-service is updated
+    uses: ./.github/workflows/shared/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=auth-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
+    
 
-      - name: Proceed with Actions
-        if: env.changes == 'true'
-        run: echo "Changes detected. Proceeding with the workflow..."
-
-      # need to have a if here
-
-      - name: Run shared workflow
-        uses: ./.github/workflows/shared/docker-build-and-push.yaml
-        with: 
-          docker_build_args: "service_name=auth-service"
-          dockerfile_path: "./Dockerfile"
-          docker_context: "."
-          image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
-
-
-
-
-
+      # cant use reusable workflow as a step
+      # - name: Run shared workflow
+      #   uses: ./.github/workflows/shared/docker-build-and-push.yaml
+      #   with: 
+      #     docker_build_args: "service_name=auth-service"
+      #     dockerfile_path: "./Dockerfile"
+      #     docker_context: "."
+      #     image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
+      
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v2
 
