@@ -15,12 +15,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch all history to ensure main branch is available
+          fetch-depth: 0  # Fetch full history to ensure we have all commits
 
-      - name: Fetch Main Branch
+      - name: Ensure Main Branch is Available
         run: |
-          # Fetch main explicitly if it's not present
-          git fetch origin main:main
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "main" ]; then
+            echo "Fetching main branch..."
+            git fetch origin main:main
+          else
+            echo "Already on main branch, skipping fetch."
+          fi
 
       - name: Determine Base Ref for Comparison
         id: determine_base_ref
