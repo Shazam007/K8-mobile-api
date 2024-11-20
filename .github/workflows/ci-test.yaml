@@ -13,7 +13,10 @@ jobs:
   filter-changes:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.filter.outputs.services }}
+      auth_service: ${{ steps.filter.outputs.auth_service }}
+      finance_service: ${{ steps.filter.outputs.finance_service }}
+      payment_service: ${{ steps.filter.outputs.payment_service }}
+      status_service: ${{ steps.filter.outputs.status_service }}
       root_changed: ${{ steps.filter.outputs.root_changed }}
     steps:
       - name: Checkout Code
@@ -26,14 +29,20 @@ jobs:
         uses: dorny/paths-filter@v3.0.2
         with:
           filters: |
-            services:
-              - 'services/**'
+            auth_service:
+              - 'services/auth-service/**'
+            finance_service:
+              - 'services/finance-service/**'
+            payment_service:
+              - 'services/payment-service/**'
+            status_service:
+              - 'services/status-service/**'
             root_changed:
               - '!(services/**)'  # Match everything except the 'services/' directory
 
   build-auth:
     needs: filter-changes
-    if: contains(needs.filter-changes.outputs.services, 'auth-service') || needs.filter-changes.outputs.root_changed == 'true'
+    if: needs.filter-changes.outputs.auth_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=auth-service"
@@ -45,7 +54,7 @@ jobs:
 
   build-finance:
     needs: filter-changes
-    if: contains(needs.filter-changes.outputs.services, 'finance-service') || needs.filter-changes.outputs.root_changed == 'true'
+    if: needs.filter-changes.outputs.finance_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=finance-service"
@@ -57,7 +66,7 @@ jobs:
 
   build-payment:
     needs: filter-changes
-    if: contains(needs.filter-changes.outputs.services, 'payment-service') || needs.filter-changes.outputs.root_changed == 'true'
+    if: needs.filter-changes.outputs.payment_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=payment-service"
@@ -69,7 +78,7 @@ jobs:
 
   build-status:
     needs: filter-changes
-    if: contains(needs.filter-changes.outputs.services, 'status-service') || needs.filter-changes.outputs.root_changed == 'true'
+    if: needs.filter-changes.outputs.status_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
       docker_build_args: "service_name=status-service"
