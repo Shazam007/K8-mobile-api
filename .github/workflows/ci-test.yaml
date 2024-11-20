@@ -39,6 +39,7 @@ jobs:
               - 'services/status-service/**'
             root_changed:
               - '!(services/**)'  # Match everything except the 'services/' directory
+              - '!(k8s/**, kube-infra/**, README.md, Dockerfile)'
 
   build-auth:
     needs: filter-changes
