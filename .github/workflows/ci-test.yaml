@@ -38,9 +38,7 @@ jobs:
             status_service:
               - 'services/status-service/**'
             root_changed:
-              - '!services/**'
-              - '!Dockerfile'
-              - '!test-config.yaml'
+              - '!(services/**|Dockerfile|test-config.yaml)'
 
   build-auth:
     needs: filter-changes
