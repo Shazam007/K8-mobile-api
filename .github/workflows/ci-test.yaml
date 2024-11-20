@@ -39,7 +39,8 @@ jobs:
               - 'services/status-service/**'
             root_changed:
               - '!(services/**)'  # Match everything except the 'services/' directory
-              - '!(Dockerfile)'
+              - '!./Dockerfile'
+              - '!./test-config.yaml'
 
   build-auth:
     needs: filter-changes
