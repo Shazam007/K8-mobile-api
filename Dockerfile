@@ -19,6 +19,7 @@ RUN npm install --production
 
 
 # Stage 2: Production Stage
+
 FROM node:18-alpine
 
 ARG service_name
