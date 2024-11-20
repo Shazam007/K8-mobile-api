@@ -1,9 +1,13 @@
 name: Build and Push Docker Images
 
 on:
-  push:
+  pull_request:
     branches:
       - '**'
+  push:
+    branches:
+      - 'feature/*'
+      - 'bugfix/*'
 
 jobs:
   check-for-changes:
