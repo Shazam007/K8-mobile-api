@@ -13,7 +13,7 @@ console.log('manually added test string')
 // Start the server
 const port = process.env.PORT || 3200;
 const server = app.listen(port, () => {
-  console.log(`Finance--Service is running on port ${port}`);
+  console.log(`Finance----Service is running on port ${port}`);
 });
 
 module.exports = { app, server };
