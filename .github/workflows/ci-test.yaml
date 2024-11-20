@@ -32,7 +32,7 @@ jobs:
               - '!(services/**)'  # Match everything except the 'services/' directory
 
   build-auth:
-    needs: check-for-changes
+    needs: filter-changes
     if: contains(needs.filter-changes.outputs.services, 'auth-service') || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
@@ -44,7 +44,7 @@ jobs:
     secrets: inherit
 
   build-finance:
-    needs: check-for-changes
+    needs: filter-changes
     if: contains(needs.filter-changes.outputs.services, 'finance-service') || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
@@ -56,7 +56,7 @@ jobs:
     secrets: inherit
 
   build-payment:
-    needs: check-for-changes
+    needs: filter-changes
     if: contains(needs.filter-changes.outputs.services, 'payment-service') || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
@@ -68,7 +68,7 @@ jobs:
     secrets: inherit
 
   build-status:
-    needs: check-for-changes
+    needs: filter-changes
     if: contains(needs.filter-changes.outputs.services, 'status-service') || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with: 
