@@ -38,7 +38,9 @@ jobs:
             status_service:
               - 'services/status-service/**'
             root_changed:
-              - '!(services/**, ./Dockerfile, ./test-config.yaml)'
+              - '!services/**'
+              - '!Dockerfile'
+              - '!test-config.yaml'
 
   build-auth:
     needs: filter-changes
@@ -50,6 +52,7 @@ jobs:
       docker_context: "."
       image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
       trivy_scan: false
+      push_to_repo: false
     secrets: inherit
 
   build-finance:
@@ -62,6 +65,7 @@ jobs:
       docker_context: "."
       image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
       trivy_scan: false
+      push_to_repo: false
     secrets: inherit
 
   build-payment:
@@ -74,6 +78,7 @@ jobs:
       docker_context: "."
       image_name: "gcr.io/devops-435706/payment-service:${{ github.sha }}"
       trivy_scan: false
+      push_to_repo: false
     secrets: inherit
 
   build-status:
@@ -86,6 +91,7 @@ jobs:
       docker_context: "."
       image_name: "gcr.io/devops-435706/status-service:${{ github.sha }}"
       trivy_scan: false
+      push_to_repo: false
     secrets: inherit
     
 
