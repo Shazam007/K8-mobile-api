@@ -9,6 +9,7 @@ app.use(express.json());
 // Routes
 app.use('/finance', financeRoute);
 
+console.log('manually added test string')
 // Start the server
 const port = process.env.PORT || 3200;
 const server = app.listen(port, () => {
