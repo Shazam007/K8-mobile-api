@@ -5,7 +5,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-
+console.log('manually added test string in barcnh 2')
 // Routes
 app.use('/finance', financeRoute);
 
