@@ -18,7 +18,7 @@ WORKDIR /app/services/$service_name
 RUN npm install --production
 
 
-# Stage 2: Production Stage
+# Stage 2: Prod Stage
 
 FROM node:18-alpine
 
