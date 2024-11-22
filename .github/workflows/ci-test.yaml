@@ -87,7 +87,7 @@ jobs:
             trivy_scan: false
             push_to_repo: false
 
-    if: needs.filter-changes.outputs.${{ matrix.skaffold_service }} == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+    if: needs.filter-changes.outputs[matrix.skaffold_service] == 'true' || needs.filter-changes.outputs.root_changed == 'true'
     uses: ./.github/workflows/docker-build-and-push.yaml
     with:
       image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
