@@ -40,117 +40,116 @@ jobs:
             root_changed:
               - '!(services/**|Dockerfile|test-config.yaml)'
   
-  build:
-    needs:
-      - filter-changes
+  # build:
+  #   needs:
+  #     - filter-changes
 
-    permissions:
-      contents: "read"
-      id-token: "write"
-      actions: read
-      packages: "read"
+  #   permissions:
+  #     contents: "read"
+  #     id-token: "write"
+  #     actions: read
+  #     packages: "read"
 
-    strategy:
-      max-parallel: 2
-      fail-fast: true
-      matrix:
-        skaffold_services:
-          - auth_service
-          - finance_service
-          - payment_service
-          - status_service
-        include:
-          - skaffold_service: auth_service
-            image_name: auth-service
-            docker_build_args: service_name=auth-service
-            trivy_scan: false
-            push_to_repo: false
+  #   strategy:
+  #     max-parallel: 2
+  #     fail-fast: true
+  #     matrix:
+  #       skaffold_services:
+  #         - auth_service
+  #         - finance_service
+  #         - payment_service
+  #         - status_service
+  #       include:
+  #         - skaffold_service: auth_service
+  #           image_name: auth-service
+  #           docker_build_args: service_name=auth-service
+  #           trivy_scan: false
+  #           push_to_repo: false
 
-          - skaffold_service: finance_service
-            image_name: finance-service
-            docker_build_args: service_name=finance-service
-            docker_tag: test
-            trivy_scan: false
-            push_to_repo: false
+  #         - skaffold_service: finance_service
+  #           image_name: finance-service
+  #           docker_build_args: service_name=finance-service
+  #           docker_tag: test
+  #           trivy_scan: false
+  #           push_to_repo: false
 
-          - skaffold_service: payment_service
-            image_name: payment-service
-            docker_build_args: service_name=payment-service
-            docker_tag: test
-            trivy_scan: false
-            push_to_repo: false
+  #         - skaffold_service: payment_service
+  #           image_name: payment-service
+  #           docker_build_args: service_name=payment-service
+  #           docker_tag: test
+  #           trivy_scan: false
+  #           push_to_repo: false
 
-          - skaffold_service: status_service
-            image_name: status-service
-            docker_build_args:  service_name=status-service
-            docker_tag: test
-            trivy_scan: false
-            push_to_repo: false
+  #         - skaffold_service: status_service
+  #           image_name: status-service
+  #           docker_build_args:  service_name=status-service
+  #           docker_tag: test
+  #           trivy_scan: false
+  #           push_to_repo: false
 
-    if: needs.filter-changes.outputs[matrix.skaffold_service] == 'true' || needs.filter-changes.outputs.root_changed == 'true'
-    uses: ./.github/workflows/docker-build-and-push.yaml
-    with:
-      image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
-      docker_context: "."
-      dockerfile_path: "./Dockerfile"
-      docker_build_args: "${{ matrix.docker_build_args }}"
-      docker_tag: "${{ matrix.docker_tag }}"
-      trivy_scan: ${{ matrix.trivy_scan }}
-      push_to_repo: ${{ matrix.push_to_repo }}
-    secrets: inherit
+  #   if: needs.filter-changes.outputs[matrix.skaffold_service] == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+  #   uses: ./.github/workflows/docker-build-and-push.yaml
+  #   with:
+  #     image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
+  #     docker_context: "."
+  #     dockerfile_path: "./Dockerfile"
+  #     docker_build_args: "${{ matrix.docker_build_args }}"
+  #     trivy_scan: ${{ matrix.trivy_scan }}
+  #     push_to_repo: ${{ matrix.push_to_repo }}
+  #   secrets: inherit
 
   
-  # build-auth:
-  #   needs: filter-changes
-  #   if: needs.filter-changes.outputs.auth_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
-  #   uses: ./.github/workflows/docker-build-and-push.yaml
-  #   with: 
-  #     docker_build_args: "service_name=auth-service"
-  #     dockerfile_path: "./Dockerfile"
-  #     docker_context: "."
-  #     image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
-  #     trivy_scan: false
-  #     push_to_repo: false
-  #   secrets: inherit
+  build-auth:
+    needs: filter-changes
+    if: needs.filter-changes.outputs.auth_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=auth-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/auth-service:${{ github.sha }}"
+      trivy_scan: false
+      push_to_repo: false
+    secrets: inherit
 
-  # build-finance:
-  #   needs: filter-changes
-  #   if: needs.filter-changes.outputs.finance_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
-  #   uses: ./.github/workflows/docker-build-and-push.yaml
-  #   with: 
-  #     docker_build_args: "service_name=finance-service"
-  #     dockerfile_path: "./Dockerfile"
-  #     docker_context: "."
-  #     image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
-  #     trivy_scan: false
-  #     push_to_repo: false
-  #   secrets: inherit
+  build-finance:
+    needs: filter-changes
+    if: needs.filter-changes.outputs.finance_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=finance-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/finance-service:${{ github.sha }}"
+      trivy_scan: false
+      push_to_repo: false
+    secrets: inherit
 
-  # build-payment:
-  #   needs: filter-changes
-  #   if: needs.filter-changes.outputs.payment_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
-  #   uses: ./.github/workflows/docker-build-and-push.yaml
-  #   with: 
-  #     docker_build_args: "service_name=payment-service"
-  #     dockerfile_path: "./Dockerfile"
-  #     docker_context: "."
-  #     image_name: "gcr.io/devops-435706/payment-service:${{ github.sha }}"
-  #     trivy_scan: false
-  #     push_to_repo: false
-  #   secrets: inherit
+  build-payment:
+    needs: filter-changes
+    if: needs.filter-changes.outputs.payment_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=payment-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/payment-service:${{ github.sha }}"
+      trivy_scan: false
+      push_to_repo: false
+    secrets: inherit
 
-  # build-status:
-  #   needs: filter-changes
-  #   if: needs.filter-changes.outputs.status_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
-  #   uses: ./.github/workflows/docker-build-and-push.yaml
-  #   with: 
-  #     docker_build_args: "service_name=status-service"
-  #     dockerfile_path: "./Dockerfile"
-  #     docker_context: "."
-  #     image_name: "gcr.io/devops-435706/status-service:${{ github.sha }}"
-  #     trivy_scan: false
-  #     push_to_repo: false
-  #   secrets: inherit
+  build-status:
+    needs: filter-changes
+    if: needs.filter-changes.outputs.status_service == 'true' || needs.filter-changes.outputs.root_changed == 'true'
+    uses: ./.github/workflows/docker-build-and-push.yaml
+    with: 
+      docker_build_args: "service_name=status-service"
+      dockerfile_path: "./Dockerfile"
+      docker_context: "."
+      image_name: "gcr.io/devops-435706/status-service:${{ github.sha }}"
+      trivy_scan: false
+      push_to_repo: false
+    secrets: inherit
     
 
 
